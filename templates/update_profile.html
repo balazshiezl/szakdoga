@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block title %}Adatok Frissítése{% endblock %}
+
+{% block content %}
+<section class="section gradient-background min-vh-100">
+    <div class="container py-5">
+        <div class="bg-white rounded shadow p-5">
+            <h1>Adatok Frissítése</h1>
+            <form method="POST" action="{{ url_for('update_profile') }}">
+                <div class="mb-3">
+                    <label for="age" class="form-label">Kor</label>
+                    <input type="number" class="form-control" id="age" name="age" required>
+                </div>
+                <div class="mb-3">
+                    <label for="weight" class="form-label">Súly (kg)</label>
+                    <input type="number" step="0.1" class="form-control" id="weight" name="weight" required>
+                </div>
+                <div class="mb-3">
+                    <label for="height" class="form-label">Magasság (cm)</label>
+                    <input type="number" step="0.1" class="form-control" id="height" name="height" required>
+                </div>
+                <div class="mb-3">
+                    <label for="gender" class="form-label">Nem</label>
+                    <select class="form-control" id="gender" name="gender" required>
+                        <option value="Male">Férfi</option>
+                        <option value="Female">Nő</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="training_intensity" class="form-label">Edzésprogram Intenzitása</label>
+                    <select class="form-control" id="training_intensity" name="training_intensity" required>
+                        <option value="Alacsony">Alacsony</option>
+                        <option value="Közepes">Közepes</option>
+                        <option value="Magas">Magas</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary">Mentés</button>
+            </form>
+        </div>
+    </div>
+</section>
+{% endblock %}

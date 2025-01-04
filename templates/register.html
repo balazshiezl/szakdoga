@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Regisztráció{% endblock %}
+{% block content %}
+<section id="registration" class="section gradient-background vh-100 d-flex align-items-center justify-content-center">
+    <div class="container col-md-6 col-lg-4 p-5 bg-white rounded shadow">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        
+        <form method="POST" action="{{ url_for('register') }}">
+            <div class="mb-3">
+                <label for="name" class="form-label">Teljes név</label>
+                <input type="text" class="form-control" id="name" name="name" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="email" class="form-label">Email cím</label>
+                <input type="email" class="form-control" id="email" name="email" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="password" class="form-label">Jelszó</label>
+                <div class="input-group">
+                    <input type="password" class="form-control" id="password" name="password" required>
+                    <span class="input-group-text">👁️</span>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label for="confirmPassword" class="form-label">Jelszó megerősítése</label>
+                <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" required>
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100">Regisztrálok</button>
+            
+            <div class="text-center mt-3">
+                Már van fiókja? <a href="{{ url_for('login') }}">Bejelentkezés</a>
+            </div>
+        </form>
+    </div>
+</section>
+{% endblock %}

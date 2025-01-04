@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block title %}Vezérlőpult{% endblock %}
+
+{% block content %}
+<section class="section gradient-background min-vh-100">
+    <div class="container py-5">
+        <div class="bg-white rounded shadow p-5">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1>Üdvözöljük, {{ current_user.name }}!</h1>
+                <a href="{{ url_for('logout') }}" class="btn btn-outline-danger">Kijelentkezés</a>
+            </div>
+            <p>Email címe: {{ current_user.email }}</p>
+            {% if current_user.height %}
+            <p>Magasság: {{ current_user.height or 'Nincs megadva' }} cm</p>
+            <p>Súly: {{ current_user.weight or 'Nincs megadva' }} kg</p>
+            <p>Nem: {{ current_user.gender or 'Nincs megadva' }}</p>
+            <p>Korcsoport: {{ current_user.age or 'Nincs megadva' }} év</p>
+            <p>Edzésprogram intenzitása: {{ current_user.training_intensity or 'Nincs megadva' }}</p>
+            <a href="{{ url_for('update_profile') }}" class="btn btn-primary">Adatok frissítése</a>
+            
+            {% else %}
+                <p><strong>További adatok szükségesek!</strong></p>
+                <a href="{{ url_for('update_profile') }}" class="btn btn-primary">Adatok megadása</a>
+            {% endif %}
+        </div>
+
+        <div class="bg-white rounded shadow p-5 mt-4">
+            <h2>Válasszon lehetőséget</h2>
+            <div class="d-flex gap-3">
+                <button id="exerciseButton" class="btn btn-success">Gyakorlatok</button>
+                <button id="mealPlannerButton" class="btn btn-warning">Étrendtervező</button>
+            </div>
+            <div id="dynamicContent" class="mt-4">
+                <!-- Dynamic content will be displayed here -->
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+    const exerciseButton = document.getElementById('exerciseButton');
+    const mealPlannerButton = document.getElementById('mealPlannerButton');
+    const dynamicContent = document.getElementById('dynamicContent');
+
+    exerciseButton.addEventListener('click', () => {
+        dynamicContent.innerHTML = `
+            <h3>Gyakorlatok:</h3>
+            <ul>
+                <li>Futás</li>
+                <li>Ugrókötél</li>
+                <li>Felülések</li>
+                <li>Guggolás</li>
+            </ul>`;
+    });
+
+    mealPlannerButton.addEventListener('click', () => {
+        dynamicContent.innerHTML = `
+            <h3>Étrendtervező:</h3>
+            <p>Állítsa össze napi étrendjét az alábbi lehetőségek alapján:</p>
+            <ul>
+                <li>Reggeli: Zabkása, tojás</li>
+                <li>Ebéd: Csirke, rizzsel és zöldségekkel</li>
+                <li>Vacsora: Saláta, hal</li>
+            </ul>`;
+    });
+</script>
+{% endblock %}

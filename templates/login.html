@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Bejelentkezés{% endblock %}
+{% block content %}
+<section class="section gradient-background vh-100 d-flex align-items-center justify-content-center">
+    <div class="container col-md-6 col-lg-4 p-5 bg-white rounded shadow">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <form method="POST" action="{{ url_for('login') }}">
+            <div class="mb-3">
+                <label for="email" class="form-label">Email cím</label>
+                <input type="email" class="form-control" id="email" name="email" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="password" class="form-label">Jelszó</label>
+                <div class="input-group">
+                    <input type="password" class="form-control" id="password" name="password" required>
+                    <span class="input-group-text">👁️</span>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100">Bejelentkezés</button>
+
+            <div class="text-center mt-3">
+                Még nincs fiókja? <a href="{{ url_for('register') }}">Regisztráció</a>
+            </div>
+        </form>
+    </div>
+</section>
+{% endblock %}
