@@ -31,3 +31,33 @@
   body{
     background-color: black;
   }
+
+  .fs-2 {
+    color: white;
+  }
+
+  .card {
+    border-radius: 10px;
+    transition: transform 0.3s ease-in-out;
+    background-color: #ffffff;
+}
+
+.card:hover {
+    transform: scale(1.05);
+}
+
+.card-body {
+    text-align: center;
+    font-size: 1rem;
+    font-weight: bold;
+}
+
+.text-primary {
+    font-weight: bold;
+    font-size: 1.2rem;
+}
+
+.d-none {
+    display: none;
+}
+

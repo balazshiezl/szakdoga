@@ -5,6 +5,8 @@
 {% block content %}
 <section class="section gradient-background min-vh-100">
     <div class="container py-5">
+
+        <!-- Felhasználói adatok kártya -->
         <div class="bg-white rounded shadow p-5">
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h1>Üdvözöljük, {{ current_user.name }}!</h1>
@@ -12,57 +14,81 @@
             </div>
             <p>Email címe: {{ current_user.email }}</p>
             {% if current_user.height %}
-            <p>Magasság: {{ current_user.height or 'Nincs megadva' }} cm</p>
-            <p>Súly: {{ current_user.weight or 'Nincs megadva' }} kg</p>
-            <p>Nem: {{ current_user.gender or 'Nincs megadva' }}</p>
-            <p>Korcsoport: {{ current_user.age or 'Nincs megadva' }} év</p>
-            <p>Edzésprogram intenzitása: {{ current_user.training_intensity or 'Nincs megadva' }}</p>
-            <a href="{{ url_for('update_profile') }}" class="btn btn-primary">Adatok frissítése</a>
-            
+                <p>Magasság: {{ current_user.height or 'Nincs megadva' }} cm</p>
+                <p>Súly: {{ current_user.weight or 'Nincs megadva' }} kg</p>
+                <p>Nem: {{ current_user.gender or 'Nincs megadva' }}</p>
+                <p>Korcsoport: {{ current_user.age or 'Nincs megadva' }} év</p>
+                <p>Edzésprogram intenzitása: {{ current_user.training_intensity or 'Nincs megadva' }}</p>
+                <p>Edzés célja: {{ current_user.training_goal or 'Nincs megadva' }}</p>
+                <a href="{{ url_for('update_profile') }}" class="btn btn-primary">Adatok frissítése</a>
             {% else %}
                 <p><strong>További adatok szükségesek!</strong></p>
                 <a href="{{ url_for('update_profile') }}" class="btn btn-primary">Adatok megadása</a>
             {% endif %}
         </div>
 
-        <div class="bg-white rounded shadow p-5 mt-4">
+        <!-- Gomb külön kártyában -->
+        <div class="bg-white rounded shadow p-4 mt-4 text-center">
             <h2>Válasszon lehetőséget</h2>
-            <div class="d-flex gap-3">
-                <button id="exerciseButton" class="btn btn-success">Gyakorlatok</button>
-                <button id="mealPlannerButton" class="btn btn-warning">Étrendtervező</button>
-            </div>
-            <div id="dynamicContent" class="mt-4">
-                <!-- Dynamic content will be displayed here -->
+            <button id="exerciseButton" class="btn btn-success mt-3">Edzésterv</button>
+        </div>
+
+        <!-- Edzéstervek megjelenítésére szolgáló kártya -->
+        <div id="trainingPlanContainer" class="bg-white rounded shadow p-5 mt-4 d-none">
+            <h3 class="mb-3">Edzésterv</h3>
+            <div id="dynamicContent" class="row">
+                <!-- Az edzéstervek itt jelennek meg -->
             </div>
         </div>
+
     </div>
 </section>
 
 <script>
-    const exerciseButton = document.getElementById('exerciseButton');
-    const mealPlannerButton = document.getElementById('mealPlannerButton');
-    const dynamicContent = document.getElementById('dynamicContent');
+    document.getElementById('exerciseButton').addEventListener('click', function () {
+        fetch('/get_training_plan')
+            .then(response => response.text())
+            .then(data => {
+                const trainingPlanContainer = document.getElementById('trainingPlanContainer');
+                const dynamicContent = document.getElementById('dynamicContent');
 
-    exerciseButton.addEventListener('click', () => {
-        dynamicContent.innerHTML = `
-            <h3>Gyakorlatok:</h3>
-            <ul>
-                <li>Futás</li>
-                <li>Ugrókötél</li>
-                <li>Felülések</li>
-                <li>Guggolás</li>
-            </ul>`;
-    });
+                // Megjeleníti az edzésterv kártyát
+                trainingPlanContainer.classList.remove('d-none');
 
-    mealPlannerButton.addEventListener('click', () => {
-        dynamicContent.innerHTML = `
-            <h3>Étrendtervező:</h3>
-            <p>Állítsa össze napi étrendjét az alábbi lehetőségek alapján:</p>
-            <ul>
-                <li>Reggeli: Zabkása, tojás</li>
-                <li>Ebéd: Csirke, rizzsel és zöldségekkel</li>
-                <li>Vacsora: Saláta, hal</li>
-            </ul>`;
+                dynamicContent.innerHTML = ''; // Ürítsük ki a tartalmat
+
+                // 1️⃣ Kinyerjük a zárójelek közötti részeket
+                const regex = /\((.*?)\)/g;
+                const matches = [...data.matchAll(regex)]; // Minden találatot begyűjtünk
+
+                let cardsHTML = '<div class="row">';
+
+                matches.forEach(match => {
+                    const exercises = match[1].split(',').map(ex => ex.trim()); // Gyakorlatok szétválasztása
+                    const firstLine = exercises.shift(); // Első sor (Nap...) külön kezelve
+
+                    cardsHTML += `
+                        <div class="col-md-6">
+                            <div class="card shadow-sm mb-3">
+                                <div class="card-body">
+                                    <h4 class="card-title text-primary">${firstLine}</h4>
+                                    <ul class="list-group list-group-flush">
+                                        ${exercises.map(ex => `<li class="list-group-item">${ex}</li>`).join('')}
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>`;
+                });
+
+                cardsHTML += '</div>';
+                dynamicContent.innerHTML = cardsHTML;
+            })
+            .catch(error => {
+                console.error("Hiba az edzésterv betöltésekor:", error);
+                document.getElementById('dynamicContent').innerHTML = '<p class="text-danger">Nem sikerült betölteni az edzéstervet.</p>';
+            });
     });
 </script>
+
+
 {% endblock %}

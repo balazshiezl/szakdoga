@@ -53,7 +53,7 @@ def init_db():
         print(f"Database initialization error: {e}", file=sys.stderr)
 
 class User(UserMixin):
-    def __init__(self, id, name, email, height=None, weight=None, gender=None, age=None, training_intensity=None):
+    def __init__(self, id, name, email, height=None, weight=None, gender=None, age=None, training_intensity=None, training_goal=None):
         self.id = id
         self.name = name
         self.email = email
@@ -62,6 +62,7 @@ class User(UserMixin):
         self.gender = gender
         self.age = age
         self.training_intensity = training_intensity
+        self.training_goal = training_goal  # ÚJ MEZŐ
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -69,7 +70,7 @@ def load_user(user_id):
         conn = get_db_connection()
         if conn:
             user_data = conn.run("""
-                SELECT id, name, email, height, weight, gender, age, training_intensity
+                SELECT id, name, email, height, weight, gender, age, training_intensity, training_goal
                 FROM users
                 WHERE id = :id
             """, id=int(user_id))
@@ -83,11 +84,14 @@ def load_user(user_id):
                     weight=user_data[0][4],
                     gender=user_data[0][5],
                     age=user_data[0][6],
-                    training_intensity=user_data[0][7]
+                    training_intensity=user_data[0][7],
+                    training_goal=user_data[0][8]  # ✅ ÚJ MEZŐ HOZZÁADVA
                 )
     except Exception as e:
         print(f"Error loading user: {e}", file=sys.stderr)
     return None
+
+
 
 @app.route('/')
 def index():
@@ -203,8 +207,9 @@ def update_profile():
         height = request.form.get('height')
         gender = request.form.get('gender')
         training_intensity = request.form.get('training_intensity')
+        training_goal = request.form.get('training_goal')  # ÚJ MEZŐ
 
-        if not age or not weight or not height or not gender or not training_intensity:
+        if not age or not weight or not height or not gender or not training_intensity or not training_goal:
             flash('Minden mező kitöltése kötelező', 'error')
             return redirect(url_for('update_profile'))
 
@@ -216,9 +221,11 @@ def update_profile():
         # Update the user's profile in the database
         conn.run("""
             UPDATE users
-            SET age = :age, weight = :weight, height = :height, gender = :gender, training_intensity = :training_intensity
+            SET age = :age, weight = :weight, height = :height, gender = :gender, 
+                training_intensity = :training_intensity, training_goal = :training_goal
             WHERE id = :id
-        """, age=age, weight=weight, height=height, gender=gender, training_intensity=training_intensity, id=current_user.id)
+        """, age=age, weight=weight, height=height, gender=gender, 
+            training_intensity=training_intensity, training_goal=training_goal, id=current_user.id)
         conn.close()
 
         # Refresh the current_user object
@@ -230,6 +237,7 @@ def update_profile():
             current_user.height = height
             current_user.gender = gender
             current_user.training_intensity = training_intensity
+            current_user.training_goal = training_goal  # ÚJ MEZŐ
 
         flash('Az adatok sikeresen frissítve lettek!', 'success')
         return redirect(url_for('dashboard'))
@@ -238,6 +246,37 @@ def update_profile():
         print(f"Update profile error: {e}", file=sys.stderr)
         flash('Hiba történt az adatok frissítése során', 'error')
         return redirect(url_for('update_profile'))
+
+
+
+
+@app.route('/get_training_plan')
+@login_required
+def get_training_plan():
+    user_key = (current_user.gender, current_user.training_intensity, current_user.training_goal)
+    print(f"🔍 Felhasználói kulcs: {user_key}")  # Debug kiírás
+
+    # Betöltjük az edzésterveket a fájlból
+    try:
+        with open("/Users/balazshiezl/Downloads/szakdoga/training_plans.txt", "r", encoding="utf-8") as f:
+            for line in f:
+                parts = line.strip().split(": ")
+                if len(parts) == 2:
+                    key, plan = parts
+                    key_parts = tuple(key.split(", "))
+                    
+                    print(f"📂 Beolvasott kulcs: {key_parts}")  # Debug kiírás
+                    if key_parts == user_key:
+                        print(f"✅ Talált edzésterv: {plan}")
+                        return plan  # Visszaadjuk a megfelelő edzéstervet
+    except Exception as e:
+        print(f"⚠️ Hiba az edzéstervek beolvasásakor: {e}")
+        return "Edzésterv nem elérhető."
+
+    print("🚫 Nincs megfelelő edzésterv az adatbázisban.")
+    return "Nincs megfelelő edzésterv az adatbázisban."
+
+
 
 if __name__ == '__main__':
     init_db()
