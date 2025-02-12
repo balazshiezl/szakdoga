@@ -5,7 +5,7 @@ import pg8000.native
 import sys
 
 app = Flask(__name__)
-app.secret_key = 'your-secret-key-here'  # Change this to a secure secret key
+app.secret_key = 'your-secret-key-here'
 bcrypt = Bcrypt(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -85,7 +85,7 @@ def load_user(user_id):
                     gender=user_data[0][5],
                     age=user_data[0][6],
                     training_intensity=user_data[0][7],
-                    training_goal=user_data[0][8]  # ✅ ÚJ MEZŐ HOZZÁADVA
+                    training_goal=user_data[0][8]
                 )
     except Exception as e:
         print(f"Error loading user: {e}", file=sys.stderr)
@@ -265,9 +265,9 @@ def get_training_plan():
                     key, plan = parts
                     key_parts = tuple(key.split(", "))
                     
-                    print(f"📂 Beolvasott kulcs: {key_parts}")  # Debug kiírás
+                    print(f"Beolvasott kulcs: {key_parts}")  # Debug kiírás
                     if key_parts == user_key:
-                        print(f"✅ Talált edzésterv: {plan}")
+                        print(f"Talált edzésterv: {plan}")
                         return plan  # Visszaadjuk a megfelelő edzéstervet
     except Exception as e:
         print(f"⚠️ Hiba az edzéstervek beolvasásakor: {e}")
