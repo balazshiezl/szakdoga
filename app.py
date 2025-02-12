@@ -4,7 +4,8 @@ from flask_login import LoginManager, UserMixin, login_user, login_required, log
 import pg8000.native
 import sys
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder='.')
+
 app.secret_key = 'your-secret-key-here'
 bcrypt = Bcrypt(app)
 login_manager = LoginManager()
