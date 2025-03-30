@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block title %}Kalória Kalkulátor{% endblock %}
+
+{% block content %}
+<section class="section gradient-background min-vh-100">
+    <div class="container py-5">
+        <div class="bg-white rounded shadow p-5">
+            <h1>Kalória Kalkulátor</h1>
+            <p>Itt rögzítheti, mit evett ma.</p>
+
+            <div class="mb-3">
+                <input type="text" id="foodItem" class="form-control" placeholder="Pl.: csirkemell, rizs, tojás">
+            </div>
+            <button id="addFoodButton" class="btn btn-primary">Hozzáadás</button>
+
+            <h3 class="mt-4">Elfogyasztott ételek</h3>
+            <ul id="foodList" class="list-group"></ul>
+
+            <h3 class="mt-4">Összesített értékek</h3>
+            <p><strong>Összes kalória:</strong> <span id="totalCalories">0</span> kcal</p>
+            <p><strong>Fehérje:</strong> <span id="totalProtein">0</span> g</p>
+            <p><strong>Szénhidrát:</strong> <span id="totalCarbs">0</span> g</p>
+            <p><strong>Zsír:</strong> <span id="totalFats">0</span> g</p>
+        </div>
+    </div>
+</section>
+
+<script>
+document.getElementById('addFoodButton').addEventListener('click', function () {
+    const foodItem = document.getElementById('foodItem').value;
+    if (!foodItem) return;
+
+    fetch(`/calories?food=${foodItem}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                alert("Nem található adat az ételhez.");
+                return;
+            }
+
+            // Add item to the list
+            const listItem = document.createElement("li");
+            listItem.className = "list-group-item";
+            listItem.innerHTML = `${data.name}: ${data.calories} kcal, Fehérje: ${data.protein}g, Szénhidrát: ${data.carbs}g, Zsír: ${data.fats}g`;
+            document.getElementById('foodList').appendChild(listItem);
+
+            // Update totals
+            document.getElementById('totalCalories').innerText = 
+                parseFloat(document.getElementById('totalCalories').innerText) + data.calories;
+            document.getElementById('totalProtein').innerText = 
+                parseFloat(document.getElementById('totalProtein').innerText) + data.protein;
+            document.getElementById('totalCarbs').innerText = 
+                parseFloat(document.getElementById('totalCarbs').innerText) + data.carbs;
+            document.getElementById('totalFats').innerText = 
+                parseFloat(document.getElementById('totalFats').innerText) + data.fats;
+        })
+        .catch(error => console.error("Hiba történt:", error));
+});
+</script>
+
+{% endblock %}

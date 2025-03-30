@@ -118,7 +118,7 @@
                             <li>&nbsp;</li>
                             <li>&nbsp;</li>
                         </ul>
-                        <button type="button" class="w-100 btn btn-lg btn-primary">Kezdjük el</button>
+                        <button type="button" class="w-100 btn btn-lg btn-primary" id="startIntermediate">Kezdjük el</button>
                     </div>
                 </div>
             </div>
@@ -135,7 +135,7 @@
                             <li>Ajánlott edzéstervek</li>
                             <li>Korlátlan használat</li>
                         </ul>
-                        <button type="button" class="w-100 btn btn-lg btn-dark">Vegye fel velünk a kapcsolatot</button>
+                        <button type="button" class="w-100 btn btn-lg btn-dark" id="startPro">Előfizetés</button>
                     </div>
                 </div>
             </div>
@@ -186,5 +186,41 @@
             </div>
         </footer>
     </div>
-</section>
+<script src="https://js.stripe.com/v3/"></script>
+<script>
+    const stripe = Stripe("pk_test_51R8HlIR7HJHOCBgmXIUIRYHsyS69Cnmb0prCpaZQfrrDaUJas5r4kvhOj8gF8Cilk2IeQUxUtSlD2xUxoOFt1xgJ006vWj1RJg"); // Cseréld saját publishable kulcsodra!
+
+    document.getElementById("startIntermediate").addEventListener("click", () => {
+        fetch("/create-checkout-session/halado", {
+            method: "POST"
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.id) {
+                stripe.redirectToCheckout({ sessionId: data.id });
+            } else {
+                alert("Nem sikerült elindítani a fizetést.");
+                console.error("Hiba: ", data);
+            }
+        });
+    });
+
+    document.getElementById("startPro").addEventListener("click", () => {
+        fetch("/create-checkout-session/profi", {
+            method: "POST"
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.id) {
+                stripe.redirectToCheckout({ sessionId: data.id });
+            } else {
+                alert("Nem sikerült elindítani a fizetést.");
+                console.error("Hiba: ", data);
+            }
+        });
+    });
+</script>
+
 {% endblock %}
+
+
