@@ -1,0 +1,39 @@
+9. Tesztelés és validáció
+Tesztelés elengedhetetlen a webes alkalmazások fejlesztése közben, így lehet biztosítani, hogy az alkalmazás teljes mértékben kielégíti a felhasználó igényeit. Dolgozat írása közben nagy hangsúlyt lett fordítva az átfogó tesztelésre.
+9.1 Funkcionális tesztelés
+Az alkalmazásnak minden területen tökélesen kell működnie a megadott feltételek alapján, ezt funkcionális teszteléssel értük el.
+A funkcionális tesztelés célja annak biztosítása volt, hogy az alkalmazás minden funkciója a megadott követelményeknek megfelelően működjön. A funkcionális tesztek a következő területekre terjedtek ki:
+•	Regisztráció, bejelentkezés és kijelentkezés: Ellenőriztük, hogy a hitelesítés helyes adatokkal sikeres, helytelen adatokkal pedig elutasításra kerül.
+•	Profiladatok frissítése: Teszteltük, hogy a felhasználók módosíthatják-e életkorukat, súlyukat, magasságukat, edzéscéljukat és intenzitásukat.
+•	Edzésterv generálása: Validáltuk, hogy a rendszer a megadott paraméterek alapján kiválasztja a megfelelő edzéstervet.
+•	Kalóriabevitel rögzítése: Teszteltük, hogy az elfogyasztott ételek adatai helyesen kerülnek mentésre, és az összefoglalók pontosak.
+•	Előfizetési rendszer működése: Teszteltük a Stripe fizetési modulját annak ellenőrzésére, hogy az előfizetési jogosultságok a sikeres tranzakciók után helyesen frissülnek-e.
+
+A funkcionális tesztelési módszertant az IEEE 829-2008 (Standard for Software Test Documentation) (ieeexplore.ieee.org) ajánlásai alapján dokumentáltuk.
+9.2 Peremesetek kezelése és hibakezelés
+A peremesetek szélsőséges vagy ritka esetek, amelyek gyakran hibákat okoznak a rendszerben, ha nem megfelelően kezelik őket. A tesztelés során többek között a következő helyzeteket is ellenőriztük:
+•	Hiányzó adatok a regisztrációs és bejelentkezési űrlapokon.
+•	Érvénytelen e-mail formátum vagy jelszóminta.
+•	Nem létező élelmiszerek keresése a kalóriabevitelben.
+•	Fizetési folyamat megszakítása vagy sikertelen tranzakció kezelése.
+A hibakezelési mechanizmusokat a Google Testing Blog ajánlásai alapján ellenőriztük, amely kiemeli, hogy a robusztus alkalmazások minden bemenetet validálnak és minden hibát szabályosan kezelnek (testing.googleblog.com).
+9.3 Frontend és UX tesztelés
+•	Informális használhatósági teszteket is végeztünk a felhasználói élmény biztosítása érdekében:
+•	Reszponzivitás: A felület megjelenését különböző képernyőméreteken (mobil, tablet, asztali) teszteltük.
+•	Navigáció: Teszteltük, hogy a felhasználók könnyen megtalálják-e az egyes funkciókat.
+•	Sebesség: A mérési eredmények alapján a főoldal betöltési ideje minden platformon 2 másodperc alatt maradt, ami összhangban van a Google által ajánlott UX korlátokkal (web.dev).
+
+9.4 Adatbiztonsági tesztelés
+A biztonsági szempontokat külön tesztelési ciklusban teszteltük:
+•	SQL injekció: Teszteltük, hogy az adatbázis-műveletek védettek-e paraméteres lekérdezésekkel.
+•	Cross-Site Scripting (XSS): Ellenőriztük, hogy a felhasználó által megadott bemenetek helyesen vannak-e escape-elve a sablonokban.
+•	Munkamenet-kezelés: Ellenőriztük, hogy a munkamenet-adatok titkosítva vannak-e tárolva, és a kijelentkezés után automatikusan érvénytelenítve vannak-e.
+•	Webhook biztonság: A Stripe webhook validációja során a helyes aláírás-ellenőrzést teszteltük.
+
+A biztonsági tesztelési irányelveket az OWASP Testing Guide (owasp.org) alapján követtük.
+9.5 Automatizált tesztelési lehetőségek
+Bár a szakdolgozat keretében elsősorban manuális tesztelést végeztünk, a projekt felépítése lehetővé teszi az automatizált tesztelés bevezetését a jövőben. A Python ökoszisztéma kiváló eszközöket biztosít ehhez, mint például:
+•	PyTest: Egyszerű szintaxisú, bővíthető tesztelési keretrendszer.
+•	Selenium: Böngészőautomatizáló eszköz felhasználói felület teszteléséhez.
+•	Flask Testing: Beépített modulok a Flask-alapú alkalmazások egyszerű teszteléséhez.
+Az automatizált tesztelés előnyeit a nemzetközi szakirodalom is megerősíti: a rendszeres tesztfuttatások lehetővé teszik a hibák korai észlelését és jelentősen csökkentik a hosszú távú karbantartási költségeket (IEEE Software Journal, 2021).

@@ -7,48 +7,46 @@
     <div class="container py-5">
         <div class="bg-white rounded shadow p-5">
             <h1>Adatok Frissítése</h1>
-            <form method="POST" action="{{ url_for('update_profile') }}">
+            <form method="POST" action="{{ url_for('user.update_profile') }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <div class="mb-3">
                     <label for="age" class="form-label">Kor</label>
-                    <input type="number" class="form-control" id="age" name="age" required>
+                    <input type="number" class="form-control" id="age" name="age" value="{{ user.age }}" required>
                 </div>
                 <div class="mb-3">
                     <label for="weight" class="form-label">Súly (kg)</label>
-                    <input type="number" step="0.1" class="form-control" id="weight" name="weight" required>
+                    <input type="number" step="0.1" class="form-control" id="weight" name="weight" value="{{ user.weight }}" required>
                 </div>
                 <div class="mb-3">
                     <label for="height" class="form-label">Magasság (cm)</label>
-                    <input type="number" step="0.1" class="form-control" id="height" name="height" required>
+                    <input type="number" step="0.1" class="form-control" id="height" name="height" value="{{ user.height }}" required>
                 </div>
                 <div class="mb-3">
                     <label for="gender" class="form-label">Nem</label>
                     <select class="form-control" id="gender" name="gender" required>
-                        <option value="Férfi">Férfi</option>
-                        <option value="Nő">Nő</option>
+                        <option value="Férfi" {% if user.gender == 'Férfi' %}selected{% endif %}>Férfi</option>
+                        <option value="Nő" {% if user.gender == 'Nő' %}selected{% endif %}>Nő</option>
                     </select>
                 </div>
                 <div class="mb-3">
                     <label for="training_intensity" class="form-label">Edzésprogram Intenzitása</label>
                     <select class="form-control" id="training_intensity" name="training_intensity" required>
-                        <option value="Alacsony">Alacsony</option>
-                        <option value="Közepes">Közepes</option>
-                        <option value="Magas">Magas</option>
+                        <option value="Alacsony" {% if user.training_intensity == 'Alacsony' %}selected{% endif %}>Alacsony</option>
+                        <option value="Közepes" {% if user.training_intensity == 'Közepes' %}selected{% endif %}>Közepes</option>
+                        <option value="Magas" {% if user.training_intensity == 'Magas' %}selected{% endif %}>Magas</option>
                     </select>
                 </div>
                 <div class="mb-3">
                     <label for="training_goal" class="form-label">Edzés Célja</label>
                     <select class="form-control" id="training_goal" name="training_goal" required>
-                        <option value="Szálkásítás">Szálkásítás</option>
-                        <option value="Tömegelés">Tömegelés</option>
+                        <option value="Szálkásítás" {% if user.training_goal == 'Szálkásítás' %}selected{% endif %}>Szálkásítás</option>
+                        <option value="Tömegelés" {% if user.training_goal == 'Tömegelés' %}selected{% endif %}>Tömegelés</option>
                     </select>
                 </div>
-                
+
                 <button type="submit" class="btn btn-primary">Mentés</button>
             </form>
         </div>
     </div>
 </section>
 {% endblock %}
-
-
-<!--TODO: visszatölteni a dolgokat-->

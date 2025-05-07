@@ -11,7 +11,8 @@
             {% endif %}
         {% endwith %}
 
-        <form method="POST" action="{{ url_for('login') }}">
+        <form method="POST" action="{{ url_for('auth.login') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <div class="mb-3">
                 <label for="email" class="form-label">Email cím</label>
                 <input type="email" class="form-control" id="email" name="email" required>
@@ -28,7 +29,7 @@
             <button type="submit" class="btn btn-primary w-100">Bejelentkezés</button>
 
             <div class="text-center mt-3">
-                Még nincs fiókja? <a href="{{ url_for('register') }}">Regisztráció</a>
+                Még nincs fiókja? <a href="{{ url_for('auth.register') }}">Regisztráció</a>
             </div>
         </form>
     </div>

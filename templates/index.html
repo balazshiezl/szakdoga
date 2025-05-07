@@ -1,6 +1,35 @@
 {% extends "base.html" %}
 {% block title %}Főoldal{% endblock %}
 {% block content %}
+<style>
+    body, p, h1, h2, h3, h4, h5, h6, a, span, div, li, ul, button {
+        color: black !important;
+    }
+
+    .text-white {
+        color: black !important;
+    }
+
+    .text-body-emphasis {
+        color: black !important;
+    }
+
+    .text-bg-dark, .bg-body-secondary, .bg-body-tertiary {
+        color: black !important;
+        background-color: white !important;
+    }
+
+    .btn-outline-light, .btn-light {
+        color: black !important;
+        background-color: white !important;
+        border-color: black !important;
+    }
+
+    .nav-link {
+        color: black !important;
+    }
+</style>
+
 <section id="title" class="section gradient-background">
     <div class="container col-xxl-8 px-4 pt-5">
         <div class="row flex-lg-row-reverse align-items-center g-5 pt-5">
@@ -11,10 +40,10 @@
                 <h1 class="display-5 fw-bold text-body-emphasis lh-1 mb-3">Legyen egyszerű a fitt életmód</h1>
                 <div class="d-grid gap-2 d-md-flex justify-content-md-start">
                     {% if current_user.is_authenticated %}
-                        <a href="{{ url_for('dashboard') }}" class="btn btn-light btn-lg px-4">Vezérlőpult</a>
+                        <a href="{{ url_for('user.dashboard') }}" class="btn btn-light btn-lg px-4">Vezérlőpult</a>
                     {% else %}
-                        <a href="{{ url_for('login') }}" class="btn btn-light btn-lg px-4">Bejelentkezés</a>
-                        <a href="{{ url_for('register') }}" class="btn btn-outline-light btn-lg px-4">Regisztráció</a>
+                        <a href="{{ url_for('auth.login') }}" class="btn btn-light btn-lg px-4">Bejelentkezés</a>
+                        <a href="{{ url_for('auth.register') }}" class="btn btn-outline-light btn-lg px-4">Regisztráció</a>                    
                     {% endif %}
                 </div>
             </div>
@@ -66,9 +95,9 @@
     </div>
 </section>
 
-<section id="testimonial" class="section">
+<section id="testimonial" class="section gradient-background">
     <div class="my-5">
-        <div class="p-5 text-center bg-body-tertiary">
+        <div class="p-5 text-center">
             <div class="container py-5">
                 <h2 class="text-body-emphasis">"Mióta életmódot váltottam sosem volt ennyire könnyű dolgom."</h2>
                 <img src="{{ url_for('static', filename='images/man.webp') }}" class="profile-img mt-5" alt="Profile">
@@ -77,6 +106,7 @@
         </div>
     </div>
 </section>
+
 
 <section id="pricing" class="section-packages">
     <div class="container">
@@ -118,11 +148,11 @@
                             <li>&nbsp;</li>
                             <li>&nbsp;</li>
                         </ul>
-                        <button type="button" class="w-100 btn btn-lg btn-primary" id="startIntermediate">Kezdjük el</button>
+                        <button id="startIntermediate" class="w-100 btn btn-lg btn-primary">Kezdjük el</button>
                     </div>
                 </div>
             </div>
-
+            
             <div class="col">
                 <div class="card mb-4 rounded-3 shadow-sm border-dark">
                     <div class="card-header py-3 text-bg-dark border-dark">
@@ -135,10 +165,12 @@
                             <li>Ajánlott edzéstervek</li>
                             <li>Korlátlan használat</li>
                         </ul>
-                        <button type="button" class="w-100 btn btn-lg btn-dark" id="startPro">Előfizetés</button>
+                        <button id="startPro" class="w-100 btn btn-lg btn-dark">Előfizetés</button> 
+                        
                     </div>
                 </div>
             </div>
+            
         </div>
     </div>
 </section>
@@ -147,7 +179,7 @@
     <div class="container">
         <footer class="row row-cols-1 row-cols-sm-2 row-cols-md-5 py-5">
             <div class="col mb-3">
-                <p class="text-white">© Tindog</p>
+                <p class="text-white">© CaloMate</p>
             </div>
 
             <div class="col mb-3"></div>
@@ -188,38 +220,37 @@
     </div>
 <script src="https://js.stripe.com/v3/"></script>
 <script>
-    const stripe = Stripe("pk_test_51R8HlIR7HJHOCBgmXIUIRYHsyS69Cnmb0prCpaZQfrrDaUJas5r4kvhOj8gF8Cilk2IeQUxUtSlD2xUxoOFt1xgJ006vWj1RJg"); // Cseréld saját publishable kulcsodra!
-
-    document.getElementById("startIntermediate").addEventListener("click", () => {
-        fetch("/create-checkout-session/halado", {
-            method: "POST"
-        })
-        .then(res => res.json())
-        .then(data => {
-            if (data.id) {
-                stripe.redirectToCheckout({ sessionId: data.id });
-            } else {
-                alert("Nem sikerült elindítani a fizetést.");
-                console.error("Hiba: ", data);
-            }
-        });
+    document.getElementById('startIntermediate').addEventListener('click', function() {
+        startCheckout('halado');
     });
-
-    document.getElementById("startPro").addEventListener("click", () => {
-        fetch("/create-checkout-session/profi", {
-            method: "POST"
-        })
-        .then(res => res.json())
-        .then(data => {
-            if (data.id) {
-                stripe.redirectToCheckout({ sessionId: data.id });
-            } else {
-                alert("Nem sikerült elindítani a fizetést.");
-                console.error("Hiba: ", data);
-            }
-        });
+    
+    document.getElementById('startPro').addEventListener('click', function() {
+        startCheckout('profi');
     });
-</script>
+    
+    function startCheckout(plan) {
+        fetch(`/create-checkout-session/${plan}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': "{{ csrf_token() }}"
+            }
+        })
+        .then(response => response.json())
+        .then(session => {
+            var stripe = Stripe('pk_test_51R8HlIR7HJHOCBgmXIUIRYHsyS69Cnmb0prCpaZQfrrDaUJas5r4kvhOj8gF8Cilk2IeQUxUtSlD2xUxoOFt1xgJ006vWj1RJg'); // <-- Itt a te nyilvános Stripe kulcsod kell
+            return stripe.redirectToCheckout({ sessionId: session.id });
+        })
+        .then(function(result) {
+            if (result.error) {
+                alert(result.error.message);
+            }
+        })
+        .catch(function(error) {
+            console.error('Error:', error);
+        });
+    }
+    </script>
 
 {% endblock %}
 

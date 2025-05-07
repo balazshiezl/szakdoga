@@ -28,9 +28,10 @@
   }
   
 
-  body{
-    background-color: black;
-  }
+  body {
+    background-color: white;
+}
+
 
   .fs-2 {
     color: white;
@@ -54,9 +55,6 @@
     background-color: #ffffff;
 }
 
-.card:hover {
-    transform: scale(1.05);
-}
 
 .card-body {
     text-align: center;
@@ -73,3 +71,16 @@
     display: none;
 }
 
+.container {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.card-user-info {
+  border: 2px solid #dc3545;
+  padding: 1.5rem;
+  border-radius: 10px;
+  color: #dc3545;
+  background-color: #fff5f5;
+  margin-bottom: 2rem;
+}

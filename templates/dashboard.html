@@ -3,44 +3,74 @@
 {% block title %}Vezérlőpult{% endblock %}
 
 {% block content %}
+{% if current_user.subscription_plan == "none" %}
+<div class="alert alert-info fade show mb-0 rounded-0" role="alert">
+    <strong>Újdonság!</strong> Próbáld ki a Profi csomagot most kedvezménnyel!
+  </div>
+  
+{% endif %}
+
 <section class="section gradient-background min-vh-100">
     <div class="container py-5">
 
-        <!-- Felhasználói adatok kártya -->
-        <div class="bg-white rounded shadow p-5">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                {% with messages = get_flashed_messages(with_categories=true) %}
-                {% if messages %}
-                    {% for category, message in messages %}
-                        <div class="alert alert-{{ category }}">{{ message }}</div>
-                    {% endfor %}
-                {% endif %}
-                {% endwith %}
-                <h1>Üdvözöljük, {{ current_user.name }}!</h1>
-                <a href="{{ url_for('logout') }}" class="btn btn-outline-danger">Kijelentkezés</a>
+        <!-- Kétoszlopos szimmetrikus elrendezés: 50% - 50% -->
+        <div class="row g-4 align-items-start">
+            <!-- Felhasználói adatok bal oldalon -->
+            <div class="col-md-6">
+                <div class="bg-white rounded shadow p-5 h-100">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            {% for category, message in messages %}
+                                <div class="alert alert-{{ category }}">{{ message }}</div>
+                            {% endfor %}
+                        {% endif %}
+                        {% endwith %}
+                        <h1>Üdvözöljük, {{ current_user.name }}!</h1>
+                        <a href="{{ url_for('auth.logout') }}" class="btn btn-outline-danger">Kijelentkezés</a>
+                    </div>
+                    <p>Email címe: {{ current_user.email }}</p>
+                    {% if current_user.height %}
+                        <p>Magasság: {{ '%.0f'|format(current_user.height|float) }} cm</p>
+                        <p>Súly: {{ '%.0f'|format(current_user.weight|float) }} kg</p>
+                        <p>Nem: {{ current_user.gender }}</p>
+                        <p>Korcsoport: {{ current_user.age or 'Nincs megadva' }} év</p>
+                        <p>Edzésprogram intenzitása: {{ current_user.training_intensity or 'Nincs megadva' }}</p>
+                        <p>Edzés célja: {{ current_user.training_goal or 'Nincs megadva' }}</p>
+                        {% if current_user.is_subscribed %}
+                            <form action="{{ url_for('subscription.cancel_subscription') }}" method="POST" class="mt-3">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <button type="submit" class="btn btn-outline-warning">Előfizetés lemondása</button>
+                            </form>
+                        {% else %}
+                            <a href="/#pricing" class="btn btn-primary">Előfizetés</a>
+                        {% endif %}
+                        <a href="{{ url_for('user.update_profile') }}" class="btn btn-primary">Adatok frissítése</a>
+                    {% else %}
+                        <p><strong>További adatok szükségesek!</strong></p>
+                        <a href="{{ url_for('user.update_profile') }}" class="btn btn-primary">Adatok megadása</a>
+                    {% endif %}
+                </div>
             </div>
-            <p>Email címe: {{ current_user.email }}</p>
-            {% if current_user.height %}
-                <p>Magasság: {{ current_user.height or 'Nincs megadva' }} cm</p>
-                <p>Súly: {{ current_user.weight or 'Nincs megadva' }} kg</p>
-                <p>Nem: {{ current_user.gender or 'Nincs megadva' }}</p>
-                <p>Korcsoport: {{ current_user.age or 'Nincs megadva' }} év</p>
-                <p>Edzésprogram intenzitása: {{ current_user.training_intensity or 'Nincs megadva' }}</p>
-                <p>Edzés célja: {{ current_user.training_goal or 'Nincs megadva' }}</p>
-                <a href="{{ url_for('update_profile') }}" class="btn btn-primary">Adatok frissítése</a>
-            {% else %}
-                <p><strong>További adatok szükségesek!</strong></p>
-                <a href="{{ url_for('update_profile') }}" class="btn btn-primary">Adatok megadása</a>
-            {% endif %}
-        </div>
 
-        <!-- Gombok a funkciókhoz -->
-        <div class="bg-white rounded shadow p-4 mt-4 text-center">
-            <h2>Válasszon lehetőséget</h2>
-            <button id="exerciseButton" class="btn btn-success mt-3">Edzésterv</button>
-            <button id="calorieButton" class="btn btn-warning mt-3">Kalória Kalkulátor</button>
+            <!-- Kalória kördiagram és gombok jobb oldalon -->
+<div class="col-md-6">
+    <div class="bg-white rounded shadow p-4 text-center mb-4">
+        <h5>Napi kalória arány</h5>
+        <div style="max-width: 180px; margin: 0 auto;">
+            <canvas id="calorieChart"></canvas>
         </div>
+        <p class="mt-3" id="calorieSummaryText" style="font-weight: bold;"></p>
+    </div>
 
+    <div class="bg-white rounded shadow p-4 text-center">
+        <h5>Válasszon lehetőséget</h5>
+        <button id="exerciseButton" class="btn btn-success mt-3">Edzésterv</button>
+        <button id="calorieButton" class="btn btn-warning mt-3">Kalória Kalkulátor</button>
+    </div>
+</div>
+
+        </div>
         <!-- Edzésterv Kártya -->
         <div id="trainingPlanContainer" class="bg-white rounded shadow p-5 mt-4 d-none">
             <h3 class="mb-3">Edzésterv</h3>
@@ -48,58 +78,145 @@
         </div>
 
         <!-- Kalória Kalkulátor -->
-        <div id="calorieContainer" class="bg-white rounded shadow p-5 mt-4 d-none">
+        <div id="calorieContainer" class="bg-white rounded shadow p-5 mt-4">
             <h3 class="mb-3">Kalória Kalkulátor</h3>
             <p>Itt rögzítheti, mit evett ma.</p>
-
-            <div class="mb-3">
-                <input type="text" id="foodItem" class="form-control" placeholder="Pl.: csirkemell, rizs, tojás">
-            </div>
-            <div class="mb-3">
-                <input type="number" id="foodAmount" class="form-control" placeholder="Mennyiség (gramm)" min="1">
-            </div>
-            <button id="addFoodButton" class="btn btn-primary">Hozzáadás</button>
-
-            <h4 class="mt-4">Elfogyasztott ételek</h4>
-            <ul id="foodList" class="list-group"></ul>
-
-           
             
-
+            <form id="calorieForm" action="{{ url_for('calorie.add_calories') }}" method="POST">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                
+                <div class="mb-3">
+                    <input type="text" name="food" class="form-control" placeholder="Pl.: csirkemell, rizs, tojás" required>
+                </div>
+                <div class="mb-3">
+                    <input type="number" name="amount" class="form-control" placeholder="Mennyiség (gramm)" min="1" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Hozzáadás</button>
+            </form>
+            
+        
+            <h4 class="mt-4">Elfogyasztott ételek</h4>
+            <ul id="foodList" class="list-group">
+            </ul>
+        
             <h4 class="mt-4">Összesített értékek</h4>
-            <p><strong>Összes kalória:</strong> <span id="totalCalories">0</span> kcal</p>
-            <p><strong>Fehérje:</strong> <span id="totalProtein">0</span> g</p>
-            <p><strong>Szénhidrát:</strong> <span id="totalCarbs">0</span> g</p>
-            <p><strong>Zsír:</strong> <span id="totalFats">0</span> g</p>
+            <p><strong>Összes kalória:</strong> {{ total_calories }} kcal</p>
+            <p><strong>Fehérje:</strong> {{ total_protein }} g</p>
+            <p><strong>Szénhidrát:</strong> {{ total_carbs }} g</p>
+            <p><strong>Zsír:</strong> {{ total_fats }} g</p>
         </div>
+        
+
+        {% if current_user.subscription_plan == 'profi' %}
+                <!-- Recept kereső szekció -->
+    <div id="recipeSearchSection" class="bg-white rounded shadow p-5 mt-4">
+        <h3 class="mb-3">Receptek keresése hozzávaló alapján</h3>
+        <div class="mb-3">
+            <input type="text" id="ingredientInput" class="form-control" placeholder="Pl.: chicken, beef, rice...">
+        </div>
+        <button id="searchRecipesButton" class="btn btn-primary">Keresés</button>
+
+        <h4 class="mt-4">Találatok:</h4>
+        <div id="recipeList" class="list-group"></div>
+
+        <h4 class="mt-5">Recept részletei:</h4>
+        <div id="recipeDetails" class="card shadow-sm p-4 mt-2 d-none"></div>
+    </div>
+        {% endif %}
+
+
 
     </div>
 </section>
 
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <script>
-    // Edzésterv gomb eseménykezelő (NEM MÓDOSÍTOTTAM)
+    document.addEventListener("DOMContentLoaded", function () {
+        // Kalória adatok betöltése
+        fetch('/get_calories')
+            .then(response => response.json())
+            .then(data => {
+                if (data.entries) {
+                    data.entries.forEach(entry => {
+                        const listItem = document.createElement("li");
+                        listItem.className = "list-group-item";
+                        const amountText = entry.amount ? ` (${entry.amount}g)` : '';
+                        listItem.innerHTML = `${entry.name}${amountText}: ${entry.calories} kcal, Fehérje: ${entry.protein}g, Szénhidrát: ${entry.carbs}g, Zsír: ${entry.fats}g`;
+
+                        document.getElementById('foodList').appendChild(listItem);
+                    });
+
+                    document.getElementById('totalCalories').innerText = data.total_calories;
+                    document.getElementById('totalProtein').innerText = data.total_protein;
+                    document.getElementById('totalCarbs').innerText = data.total_carbs;
+                    document.getElementById('totalFats').innerText = data.total_fats;
+                }
+            })
+            .catch(error => console.error("Hiba történt a kalóriaadatok betöltésekor:", error));
+
+        // Kalória kördiagram betöltése
+        fetch('/calorie_stats')
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) return;
+
+                const consumed = data.consumed;
+                const required = data.required;
+                const remaining = Math.max(required - consumed, 0);
+
+                // Szöveg frissítése alulra
+                document.getElementById('calorieSummaryText').innerText = `${consumed} kcal / ${required} kcal`;
+
+                // Diagram kirajzolása
+                const ctx = document.getElementById('calorieChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Elfogyasztva', 'Hátralévő'],
+                        datasets: [{
+                            data: [consumed, remaining],
+                            backgroundColor: ['#ff6384', '#36a2eb'],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        cutout: '70%',
+                        plugins: {
+                            legend: { position: 'bottom' },
+                            tooltip: {
+                                callbacks: {
+                                    label: function (context) {
+                                        return `${context.label}: ${context.parsed} kcal`;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            })
+            .catch(err => console.error('Hiba a kördiagram betöltésekor:', err));
+    });
+
+    // Gomb események (edzésterv & kalkulátor)
     document.getElementById('exerciseButton').addEventListener('click', function () {
         fetch('/get_training_plan')
             .then(response => response.text())
             .then(data => {
                 const trainingPlanContainer = document.getElementById('trainingPlanContainer');
                 const dynamicContent = document.getElementById('dynamicContent');
-
-                // Megjeleníti az edzésterv kártyát
                 trainingPlanContainer.classList.remove('d-none');
-                document.getElementById('calorieContainer').classList.add('d-none'); // Kalória kalkulátort elrejti
+                document.getElementById('calorieContainer').classList.add('d-none');
+                dynamicContent.innerHTML = '';
 
-                dynamicContent.innerHTML = ''; // Ürítsük ki a tartalmat
-
-                // 1️⃣ Kinyerjük a zárójelek közötti részeket
                 const regex = /\((.*?)\)/g;
-                const matches = [...data.matchAll(regex)]; // Minden találatot begyűjtünk
+                const matches = [...data.matchAll(regex)];
 
                 let cardsHTML = '<div class="row">';
-
                 matches.forEach(match => {
-                    const exercises = match[1].split(',').map(ex => ex.trim()); // Gyakorlatok szétválasztása
-                    const firstLine = exercises.shift(); // Első sor (Nap...) külön kezelve
+                    const exercises = match[1].split(',').map(ex => ex.trim());
+                    const firstLine = exercises.shift();
 
                     cardsHTML += `
                         <div class="col-md-6">
@@ -113,7 +230,6 @@
                             </div>
                         </div>`;
                 });
-
                 cardsHTML += '</div>';
                 dynamicContent.innerHTML = cardsHTML;
             })
@@ -123,75 +239,96 @@
             });
     });
 
-    // Kalória kalkulátor gomb eseménykezelő
     document.getElementById('calorieButton').addEventListener('click', function () {
         const calorieContainer = document.getElementById('calorieContainer');
-        calorieContainer.classList.toggle('d-none'); // Mutat/elrejt kalória kalkulátort
-        document.getElementById('trainingPlanContainer').classList.add('d-none'); // Edzéstervet elrejti
+        calorieContainer.classList.toggle('d-none');
+        document.getElementById('trainingPlanContainer').classList.add('d-none');
     });
 
-    // Étel hozzáadása és kalóriaszámítás (Most támogatja a gramokat)
-    document.getElementById('addFoodButton').addEventListener('click', function () {
-        const foodItem = document.getElementById('foodItem').value;
-        const foodAmount = parseInt(document.getElementById('foodAmount').value) || 100; // Default 100g
 
-        if (!foodItem) return;
 
-        fetch(`/calories`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ food: foodItem, amount: foodAmount })
-        })
+// Hozzávaló alapú recept keresés
+
+document.getElementById('searchRecipesButton').addEventListener('click', function () {
+    const ingredient = document.getElementById('ingredientInput').value.trim();
+    const recipeList = document.getElementById('recipeList');
+    const recipeDetails = document.getElementById('recipeDetails');
+
+    if (!ingredient) {
+        alert('Kérlek adj meg legalább egy hozzávalót!');
+        return;
+    }
+
+    recipeList.innerHTML = '<p>Betöltés...</p>';
+    recipeDetails.classList.add('d-none');
+    recipeDetails.innerHTML = '';
+
+    fetch(`/recipes?ingredients=${encodeURIComponent(ingredient)}`)
         .then(response => response.json())
         .then(data => {
             if (data.error) {
-                alert("Nem található adat az ételhez.");
+                recipeList.innerHTML = `<p class="text-danger">${data.error}</p>`;
                 return;
             }
 
-            // Étel hozzáadása a listához
-            const listItem = document.createElement("li");
-            listItem.className = "list-group-item";
-            listItem.innerHTML = `${data.name} (${foodAmount}g): ${data.calories} kcal, Fehérje: ${data.protein}g, Szénhidrát: ${data.carbs}g, Zsír: ${data.fats}g`;
-            document.getElementById('foodList').appendChild(listItem);
+            if (data.length === 0) {
+                recipeList.innerHTML = '<p class="text-warning">Nincs találat.</p>';
+                return;
+            }
 
-            // Frissítjük az összesített értékeket
-            document.getElementById('totalCalories').innerText = 
-                parseFloat(document.getElementById('totalCalories').innerText) + data.calories;
-            document.getElementById('totalProtein').innerText = 
-                parseFloat(document.getElementById('totalProtein').innerText) + data.protein;
-            document.getElementById('totalCarbs').innerText = 
-                parseFloat(document.getElementById('totalCarbs').innerText) + data.carbs;
-            document.getElementById('totalFats').innerText = 
-                parseFloat(document.getElementById('totalFats').innerText) + data.fats;
+            let output = '';
+            data.forEach(recipe => {
+                output += `
+                    <button class="list-group-item list-group-item-action" onclick="loadRecipeDetails(${recipe.id})">
+                        ${recipe.title}
+                    </button>
+                `;
+            });
+
+            recipeList.innerHTML = output;
         })
-        .catch(error => console.error("Hiba történt:", error));
-    });
+        .catch(error => {
+            console.error('Hiba történt:', error);
+            recipeList.innerHTML = '<p class="text-danger">Hiba történt a keresés során.</p>';
+        });
+});
 
-    // Betöltjük a felhasználó napi kalóriaadatait
-    document.addEventListener("DOMContentLoaded", function () {
-        fetch('/get_calories')
-            .then(response => response.json())
-            .then(data => {
-                if (data.entries) {
-                    data.entries.forEach(entry => {
-                        const listItem = document.createElement("li");
-                        listItem.className = "list-group-item";
-                        listItem.innerHTML = `${entry.name} (${entry.amount}g): ${entry.calories} kcal, Fehérje: ${entry.protein}g, Szénhidrát: ${entry.carbs}g, Zsír: ${entry.fats}g`;
-                        document.getElementById('foodList').appendChild(listItem);
-                    });
+// Recept részleteinek betöltése ID alapján
+function loadRecipeDetails(recipeId) {
+    const recipeDetails = document.getElementById('recipeDetails');
+    recipeDetails.innerHTML = '<p>Betöltés...</p>';
+    recipeDetails.classList.remove('d-none');
 
-                    // Összesített értékek frissítése
-                    document.getElementById('totalCalories').innerText = data.total_calories;
-                    document.getElementById('totalProtein').innerText = data.total_protein;
-                    document.getElementById('totalCarbs').innerText = data.total_carbs;
-                    document.getElementById('totalFats').innerText = data.total_fats;
-                }
-            })
-            .catch(error => console.error("Hiba történt a kalóriaadatok betöltésekor:", error));
-    });
+    fetch(`/recipe/${recipeId}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                recipeDetails.innerHTML = `<p class="text-danger">${data.error}</p>`;
+                return;
+            }
+
+            let ingredients = '';
+            if (data.extendedIngredients) {
+                ingredients = data.extendedIngredients.map(ing => `<li>${ing.original}</li>`).join('');
+            }
+
+            recipeDetails.innerHTML = `
+                <h5 class="text-primary">${data.title}</h5>
+                <h6>Hozzávalók:</h6>
+                <ul>${ingredients}</ul>
+                <h6>Elkészítés:</h6>
+                <p>${data.instructions || 'Nincs részletes leírás.'}</p>
+            `;
+        })
+        .catch(error => {
+            console.error('Hiba történt:', error);
+            recipeDetails.innerHTML = '<p class="text-danger">Nem sikerült betölteni a receptet.</p>';
+        });
+}
+
+
+
+
 
 </script>
-
-
 {% endblock %}
