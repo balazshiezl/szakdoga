@@ -5,6 +5,7 @@ from controllers.auth_controller import auth_bp
 from models.db import get_connection
 from models.user_model import User
 from extensions import csrf
+
 # később: from controllers.user_controller import user_bp, stb.
 
 from models.user_model import get_user_by_email

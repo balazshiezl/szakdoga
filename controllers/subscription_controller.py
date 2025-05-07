@@ -5,10 +5,10 @@ from models.db import get_connection
 from config import STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET
 import stripe
 from extensions import csrf
-
-
-stripe.api_key = STRIPE_SECRET_KEY
-
+import os
+from dotenv import load_dotenv
+load_dotenv()
+stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
 subscription_bp = Blueprint('subscription', __name__)
 
 @subscription_bp.route('/create-checkout-session/<plan>', methods=['POST'])
@@ -48,7 +48,7 @@ def create_checkout_session(plan):
 def stripe_webhook():
     payload = request.data
     sig_header = request.headers.get('stripe-signature')
-    endpoint_secret = STRIPE_WEBHOOK_SECRET
+    endpoint_secret = os.getenv("STRIPE_WEBHOOK_SECRET")
 
     try:
         event = stripe.Webhook.construct_event(payload, sig_header, endpoint_secret)

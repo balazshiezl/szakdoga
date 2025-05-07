@@ -1,6 +1,8 @@
 import requests
-
-API_KEY = "4fbd8719bfde4c978ba941537a38b64c"
+import os
+from dotenv import load_dotenv
+load_dotenv()
+API_KEY = os.getenv("SPOONACULAR_API")
 BASE_URL = "https://api.spoonacular.com"
 
 def get_recipe_by_ingredients(ingredients):
