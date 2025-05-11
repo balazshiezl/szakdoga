@@ -1,6 +1,10 @@
 from flask import Blueprint, request, jsonify
 from models.spoonacular_api import get_recipe_by_ingredients, get_recipe_details
 from models.db import get_connection
+from dotenv import load_dotenv
+import os
+load_dotenv()
+spoonacalular_api_key = os.getenv('SPROUTACULAR_API_KEY')
 
 
 recipe_bp = Blueprint('recipe', __name__)

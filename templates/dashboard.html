@@ -3,7 +3,7 @@
 {% block title %}Vezérlőpult{% endblock %}
 
 {% block content %}
-{% if current_user.subscription_plan == "none" %}
+{% if current_user.subscription_plan == "null" %}
 <div class="alert alert-info fade show mb-0 rounded-0" role="alert">
     <strong>Újdonság!</strong> Próbáld ki a Profi csomagot most kedvezménnyel!
   </div>

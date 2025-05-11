@@ -2,7 +2,6 @@ from flask_wtf.csrf import CSRFProtect  # csak CSRFProtect import kell
 from flask import Blueprint, jsonify, request, url_for, redirect, flash
 from flask_login import login_required, current_user
 from models.db import get_connection
-from config import STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET
 import stripe
 from extensions import csrf
 import os

@@ -6,6 +6,7 @@ API_KEY = os.getenv("SPOONACULAR_API")
 BASE_URL = "https://api.spoonacular.com"
 
 def get_recipe_by_ingredients(ingredients):
+    print(API_KEY)
     """
     Fetches recipes based on available ingredients.
     """

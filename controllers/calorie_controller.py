@@ -3,7 +3,8 @@ from flask_login import login_required, current_user
 from models.calorie_model import save_calorie_entry, get_today_calories
 from models.spoonacular_api import get_food_nutrition
 from models.db import get_connection
-
+from dotenv import load_dotenv
+load_dotenv()
 
 calorie_bp = Blueprint('calorie', __name__)
 
