@@ -1,16 +1,18 @@
-# models/db.py
-
 import pg8000.native
 import sys
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 def get_connection():
     try:
         return pg8000.native.Connection(
-            user="hbalazs",
-            password="krokodil1",
+            user=os.getenv("POSTGRES_USER"),
+            password=os.getenv("POSTGRES_PASSWORD"),
             host="localhost",
             port=5432,
-            database="szakdolgozat"
+            database=os.getenv("POSTGRES_DB")
         )
     except Exception as e:
         print(f"[DB HIBA] {e}", file=sys.stderr)
