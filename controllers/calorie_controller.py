@@ -44,7 +44,7 @@ def add_calories():
 
         if not food:
             flash('Étel megadása kötelező!', 'danger')
-            return redirect(url_for('user.dashboard'))  # ← ide térj vissza!
+            return redirect(url_for('user.dashboard'))  
 
         nutrition = get_food_nutrition(food, amount)
         if not nutrition:
@@ -53,7 +53,7 @@ def add_calories():
 
         save_calorie_entry(current_user.id, nutrition)
         flash('Étel sikeresen hozzáadva!', 'success')
-        return redirect(url_for('user.dashboard'))  # ← ide térj vissza!
+        return redirect(url_for('user.dashboard'))  
 
     except Exception as e:
         print(f"Hiba kalória mentés közben: {e}")
@@ -112,11 +112,11 @@ def calorie_stats():
 
         daily_need = bmr * multiplier
 
-        # 🎯 Célnak megfelelő módosítás
+     
         if goal == 'tömegelés':
             daily_need *= 1.15  # +15% kalória
         elif goal == 'szálkásítás':
-            daily_need *= 0.85  # -20% kalória
+            daily_need *= 0.85  # -15% kalória
 
         daily_need = round(daily_need)
 

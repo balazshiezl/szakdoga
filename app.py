@@ -6,7 +6,6 @@ from models.db import get_connection
 from models.user_model import User
 from extensions import csrf
 
-# később: from controllers.user_controller import user_bp, stb.
 
 from models.user_model import get_user_by_email
 
@@ -25,7 +24,6 @@ login_manager.init_app(app)
 
 @login_manager.user_loader
 def load_user(user_id):
-    # később: külön metódus a user_model-ben
     conn = get_connection()
     result = conn.run("SELECT * FROM users WHERE id = :id", id=int(user_id))
     conn.close()

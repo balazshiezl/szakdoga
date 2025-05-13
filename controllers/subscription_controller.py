@@ -1,4 +1,4 @@
-from flask_wtf.csrf import CSRFProtect  # csak CSRFProtect import kell
+from flask_wtf.csrf import CSRFProtect 
 from flask import Blueprint, jsonify, request, url_for, redirect, flash
 from flask_login import login_required, current_user
 from models.db import get_connection
@@ -14,8 +14,8 @@ subscription_bp = Blueprint('subscription', __name__)
 @login_required
 def create_checkout_session(plan):
     price_lookup = {
-        'halado': 'price_1R8I2DR7HJHOCBgm532K337H',
-        'profi': 'price_1R8I4sR7HJHOCBgmDtA05EGP'
+        'halado': os.getenv("STRIPE_HALADO"),
+        'profi': os.getenv("STRIPE_PROFI"),
     }
 
     price_id = price_lookup.get(plan)
@@ -58,8 +58,8 @@ def stripe_webhook():
         print("[Webhook] General webhook error:", e)
         return '', 400
 
-    print("[Webhook] Event type:", event['type'])  # <<< LOG
-    print("[Webhook] Event data:", event['data'])  # <<< LOG
+    print("[Webhook] Event type:", event['type'])  
+    print("[Webhook] Event data:", event['data'])  
 
     if event['type'] in ['checkout.session.completed', 'invoice.paid']:
         session = event['data']['object']
@@ -70,7 +70,7 @@ def stripe_webhook():
         if 'metadata' in session and session['metadata'].get('plan'):
             plan = session['metadata']['plan']
 
-        # Ha nincs email, próbáljuk a customer ID alapján lekérni
+        
         if not email and session.get('customer'):
             try:
                 customer = stripe.Customer.retrieve(session['customer'])
@@ -78,16 +78,15 @@ def stripe_webhook():
             except Exception as e:
                 print("[Webhook] Nem sikerült lekérni a Stripe customert:", e)
 
-        # Ha invoice.paid és nincs plan, próbáljuk a subscriptionból
+        
         if not plan and session.get('subscription'):
             try:
                 subscription = stripe.Subscription.retrieve(session['subscription'])
                 price = subscription['items']['data'][0]['price']
-                plan = price['nickname'].lower()  # helyesen nickname-ből
+                plan = price['nickname'].lower()
             except Exception as sub_error:
                 print("[Webhook] Hiba a subscription lekérdezés közben:", sub_error)
 
-        # Most, hogy van email és plan
         if email and plan:
             try:
                 conn = get_connection()

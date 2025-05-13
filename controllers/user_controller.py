@@ -70,19 +70,15 @@ def update_profile():
 @user_bp.route('/get_training_plan')
 @login_required
 def get_training_plan():
-    # Check if user has necessary profile data
     if not all([current_user.gender, current_user.training_intensity, current_user.training_goal]):
         return "Kérjük frissítse a profilját a megfelelő edzésterv generálásához."
     
-    # Convert to string first, then strip and capitalize
     user_gender = str(current_user.gender).strip().capitalize()
     user_intensity = str(current_user.training_intensity).strip().capitalize() 
     user_goal = str(current_user.training_goal).strip().capitalize()
     
-    # Debug statements
     print(f"Looking for plan with: Gender={user_gender}, Intensity={user_intensity}, Goal={user_goal}")
     
-    # Create the search pattern (Capitalized format with commas)
     search_pattern = f"{user_gender}, {user_intensity}, {user_goal}"
     print(f"Search pattern: {search_pattern}")
     
@@ -91,15 +87,12 @@ def get_training_plan():
         with open(path, 'r', encoding='utf-8') as f:
             full_content = f.read()
         
-        # Look for exact match at the start of a line
         for line in full_content.splitlines():
             if line.startswith(search_pattern):
-                # Split at the first colon
                 plan_data = line.split(':', 1)[1].strip()
-                print(f"Found plan: {plan_data[:50]}...")  # Debug - print beginning of plan
+                print(f"Found plan: {plan_data[:50]}...")
                 return plan_data
             
-        # No direct match found, try case-insensitive search
         search_pattern_lower = search_pattern.lower()
         for line in full_content.splitlines():
             key_part = line.split(':', 1)[0].strip().lower()
@@ -108,9 +101,8 @@ def get_training_plan():
                 print(f"Found plan (case-insensitive): {plan_data[:50]}...")
                 return plan_data
         
-        # Still not found, check for whitespace issues
         for line in full_content.splitlines():
-            if ':' in line:  # Ensure line has the expected format
+            if ':' in line:
                 key_parts = [k.strip().lower() for k in line.split(':', 1)[0].split(',')]
                 user_parts = [user_gender.lower(), user_intensity.lower(), user_goal.lower()]
                 
@@ -118,8 +110,7 @@ def get_training_plan():
                     plan_data = line.split(':', 1)[1].strip()
                     print(f"Found plan (normalized): {plan_data[:50]}...")
                     return plan_data
-                
-        # If we've checked all lines and found no match
+
         print("No matching plan found for:", search_pattern)
         return "Nincs megfelelő edzésterv az ön paramétereihez. Kérjük, ellenőrizze profil adatait."
 
