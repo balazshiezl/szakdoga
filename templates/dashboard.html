@@ -3,7 +3,7 @@
 {% block title %}Vezérlőpult{% endblock %}
 
 {% block content %}
-{% if current_user.subscription_plan == "null" %}
+{% if current_user.subscription_plan is none %}
 <div class="alert alert-info fade show mb-0 rounded-0" role="alert">
     <strong>Újdonság!</strong> Próbáld ki a Profi csomagot most kedvezménnyel!
   </div>
@@ -26,7 +26,6 @@
                         {% endif %}
                         {% endwith %}
                         <h1>Üdvözöljük, {{ current_user.name }}!</h1>
-                        <a href="{{ url_for('auth.logout') }}" class="btn btn-outline-danger">Kijelentkezés</a>
                     </div>
                     <p>Email címe: {{ current_user.email }}</p>
                     {% if current_user.height %}
@@ -49,6 +48,7 @@
                         <p><strong>További adatok szükségesek!</strong></p>
                         <a href="{{ url_for('user.update_profile') }}" class="btn btn-primary">Adatok megadása</a>
                     {% endif %}
+                    <a href="{{ url_for('auth.logout') }}" class="btn btn-outline-danger">Kijelentkezés</a>
                 </div>
             </div>
 
